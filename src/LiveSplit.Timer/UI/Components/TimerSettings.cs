@@ -1,8 +1,9 @@
-﻿using LiveSplit.TimeFormatters;
-using System;
+﻿using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Xml;
+
+using LiveSplit.TimeFormatters;
 
 namespace LiveSplit.UI.Components
 {
@@ -88,7 +89,7 @@ namespace LiveSplit.UI.Components
             cmbAccuracy.DataBindings.Add("SelectedItem", this, "Accuracy", false, DataSourceUpdateMode.OnPropertyChanged);
         }
 
-        void cmbTimerFormat_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbTimerFormat_SelectedIndexChanged(object sender, EventArgs e)
         {
             DigitsFormat = cmbDigitsFormat.SelectedItem.ToString();
         }
@@ -98,17 +99,17 @@ namespace LiveSplit.UI.Components
             Accuracy = cmbAccuracy.SelectedItem.ToString();
         }
 
-        void cmbTimingMethod_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbTimingMethod_SelectedIndexChanged(object sender, EventArgs e)
         {
             TimingMethod = cmbTimingMethod.SelectedItem.ToString();
         }
 
-        void chkOverrideTimerColors_CheckedChanged(object sender, EventArgs e)
+        private void chkOverrideTimerColors_CheckedChanged(object sender, EventArgs e)
         {
             label1.Enabled = btnTimerColor.Enabled = chkOverrideTimerColors.Checked;
         }
 
-        void cmbGradientType_SelectedIndexChanged(object sender, EventArgs e)
+        private void cmbGradientType_SelectedIndexChanged(object sender, EventArgs e)
         {
             var selectedText = cmbGradientType.SelectedItem.ToString();
             btnColor1.Visible = selectedText != "Plain" && !selectedText.Contains("Delta");
@@ -138,7 +139,7 @@ namespace LiveSplit.UI.Components
             }
         }
 
-        void TimerSettings_Load(object sender, EventArgs e)
+        private void TimerSettings_Load(object sender, EventArgs e)
         {
             chkOverrideTimerColors_CheckedChanged(null, null);
 
@@ -177,9 +178,13 @@ namespace LiveSplit.UI.Components
             TimingMethod = SettingsHelper.ParseString(element["TimingMethod"], "Current Timing Method");
 
             if (version >= new Version(1, 3))
+            {
                 OverrideSplitColors = SettingsHelper.ParseBool(element["OverrideSplitColors"]);
+            }
             else
+            {
                 OverrideSplitColors = !SettingsHelper.ParseBool(element["UseSplitColors"], true);
+            }
 
             if (version >= new Version(1, 2))
             {
@@ -192,18 +197,24 @@ namespace LiveSplit.UI.Components
                     var accuracy = SettingsHelper.ParseEnum<TimeAccuracy>(element["TimerAccuracy"]);
                     DigitsFormat = "1";
                     if (accuracy == TimeAccuracy.Hundredths)
+                    {
                         Accuracy = ".23";
+                    }
                     else if (accuracy == TimeAccuracy.Tenths)
+                    {
                         Accuracy = ".2";
+                    }
                     else
+                    {
                         Accuracy = "";
+                    }
                 }
             }
             else
             {
                 DigitsFormat = "1";
                 Accuracy = ".23";
-            }        
+            }
         }
 
         public XmlNode GetSettings(XmlDocument document)

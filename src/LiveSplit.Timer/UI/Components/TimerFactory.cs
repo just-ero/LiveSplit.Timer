@@ -1,6 +1,7 @@
-﻿using LiveSplit.Model;
+﻿using System;
+
+using LiveSplit.Model;
 using LiveSplit.UI.Components;
-using System;
 
 [assembly: ComponentFactory(typeof(TimerFactory))]
 
@@ -14,7 +15,10 @@ namespace LiveSplit.UI.Components
 
         public ComponentCategory Category => ComponentCategory.Timer;
 
-        public IComponent Create(LiveSplitState state) => new Timer();
+        public IComponent Create(LiveSplitState state)
+        {
+            return new Timer();
+        }
 
         public string UpdateName => ComponentName;
 

@@ -1,12 +1,12 @@
-﻿using LiveSplit.Model;
-using LiveSplit.TimeFormatters;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Text;
 using System.Linq;
 using System.Windows.Forms;
+
+using LiveSplit.Model;
+using LiveSplit.TimeFormatters;
 
 namespace LiveSplit.UI.Components
 {
@@ -66,7 +66,6 @@ namespace LiveSplit.UI.Components
                 Text = "0",
             };
 
-
             BigMeasureLabel = new SimpleLabel()
             {
                 Text = "88:88:88",
@@ -80,7 +79,7 @@ namespace LiveSplit.UI.Components
             TimerColor = Color.Transparent;
         }
 
-        public static void DrawBackground(Graphics g, Color timerColor, Color settingsColor1, Color settingsColor2, 
+        public static void DrawBackground(Graphics g, Color timerColor, Color settingsColor1, Color settingsColor2,
             float width, float height, DeltasGradientType gradientType)
         {
             var background1 = settingsColor1;
@@ -89,8 +88,7 @@ namespace LiveSplit.UI.Components
                 || gradientType == DeltasGradientType.HorizontalWithDeltaColor
                 || gradientType == DeltasGradientType.VerticalWithDeltaColor)
             {
-                double h, s, v;
-                timerColor.ToHSV(out h, out s, out v);
+                timerColor.ToHSV(out double h, out double s, out double v);
                 var newColor = ColorExtensions.FromHSV(h, s * 0.5, v * 0.25);
 
                 if (gradientType == DeltasGradientType.PlainWithDeltaColor)
@@ -103,9 +101,10 @@ namespace LiveSplit.UI.Components
                     background2 = Color.FromArgb(timerColor.A, newColor);
                 }
             }
+
             if (background1.A > 0
-            || gradientType != DeltasGradientType.Plain
-            && background2.A > 0)
+            || (gradientType != DeltasGradientType.Plain
+            && background2.A > 0))
             {
                 var gradientBrush = new LinearGradientBrush(
                             new PointF(0, 0),
@@ -129,7 +128,7 @@ namespace LiveSplit.UI.Components
             if (state.LayoutSettings.TimerFont != TimerFont || Settings.DecimalsSize != PreviousDecimalsSize)
             {
                 TimerFont = state.LayoutSettings.TimerFont;
-                TimerDecimalPlacesFont = new Font(TimerFont.FontFamily.Name, (TimerFont.Size / 50f) * (Settings.DecimalsSize), TimerFont.Style, GraphicsUnit.Pixel);
+                TimerDecimalPlacesFont = new Font(TimerFont.FontFamily.Name, TimerFont.Size / 50f * Settings.DecimalsSize, TimerFont.Style, GraphicsUnit.Pixel);
                 PreviousDecimalsSize = Settings.DecimalsSize;
             }
 
@@ -150,7 +149,10 @@ namespace LiveSplit.UI.Components
             g.ScaleTransform(scale, scale);
             g.TranslateTransform(-unscaledWidth + adjustValue, -0.5f * unscaledHeight);
             if (Settings.CenterTimer)
-                g.TranslateTransform((-(width - unscaledWidth * scale) / 2f) / scale, 0);
+            {
+                g.TranslateTransform(-(width - (unscaledWidth * scale)) / 2f / scale, 0);
+            }
+
             DrawUnscaled(g, state, unscaledWidth, unscaledHeight);
             ActualWidth = scale * (SmallTextLabel.ActualWidth + BigTextLabel.ActualWidth);
             g.Transform = oldMatrix;
@@ -189,11 +191,10 @@ namespace LiveSplit.UI.Components
             if (Settings.ShowGradient && BigTextLabel.Brush is SolidBrush)
             {
                 var originalColor = (BigTextLabel.Brush as SolidBrush).Color;
-                double h, s, v;
-                originalColor.ToHSV(out h, out s, out v);
+                originalColor.ToHSV(out double h, out double s, out double v);
 
                 var bottomColor = ColorExtensions.FromHSV(h, s, 0.8 * v);
-                var topColor = ColorExtensions.FromHSV(h, 0.5 * s, Math.Min(1, 1.5 * v + 0.1));
+                var topColor = ColorExtensions.FromHSV(h, 0.5 * s, Math.Min(1, (1.5 * v) + 0.1));
 
                 var bigTimerGradiantBrush = new LinearGradientBrush(
                     new PointF(BigTextLabel.X, BigTextLabel.Y),
@@ -217,28 +218,46 @@ namespace LiveSplit.UI.Components
         protected void UpdateTimeFormat()
         {
             if (Settings.DigitsFormat == "1")
+            {
                 CurrentDigitsFormat = DigitsFormat.SingleDigitSeconds;
+            }
             else if (Settings.DigitsFormat == "00:01")
+            {
                 CurrentDigitsFormat = DigitsFormat.DoubleDigitMinutes;
+            }
             else if (Settings.DigitsFormat == "0:00:01")
+            {
                 CurrentDigitsFormat = DigitsFormat.SingleDigitHours;
+            }
             else
+            {
                 CurrentDigitsFormat = DigitsFormat.DoubleDigitHours;
+            }
 
             if (Settings.Accuracy == ".23")
+            {
                 CurrentAccuracy = TimeAccuracy.Hundredths;
+            }
             else if (Settings.Accuracy == ".2")
+            {
                 CurrentAccuracy = TimeAccuracy.Tenths;
+            }
             else
+            {
                 CurrentAccuracy = TimeAccuracy.Seconds;
+            }
         }
 
         public virtual TimeSpan? GetTime(LiveSplitState state, TimingMethod method)
         {
             if (state.CurrentPhase == TimerPhase.NotRunning)
+            {
                 return state.Run.Offset;
+            }
             else
+            {
                 return state.CurrentTime[method];
+            }
         }
 
         public void DrawVertical(Graphics g, LiveSplitState state, float width, Region clipRegion)
@@ -273,14 +292,20 @@ namespace LiveSplit.UI.Components
 
             var timingMethod = state.CurrentTimingMethod;
             if (Settings.TimingMethod == "Real Time")
+            {
                 timingMethod = TimingMethod.RealTime;
+            }
             else if (Settings.TimingMethod == "Game Time")
+            {
                 timingMethod = TimingMethod.GameTime;
+            }
 
             var timeValue = GetTime(state, timingMethod);
 
             if (timeValue == null && timingMethod == TimingMethod.GameTime)
+            {
                 timeValue = GetTime(state, TimingMethod.RealTime);
+            }
 
             if (timeValue != null)
             {
@@ -288,11 +313,17 @@ namespace LiveSplit.UI.Components
                 int dotIndex = timeString.IndexOf(".");
                 BigTextLabel.Text = timeString.Substring(0, dotIndex);
                 if (CurrentAccuracy == TimeAccuracy.Hundredths)
+                {
                     SmallTextLabel.Text = timeString.Substring(dotIndex);
+                }
                 else if (CurrentAccuracy == TimeAccuracy.Tenths)
+                {
                     SmallTextLabel.Text = timeString.Substring(dotIndex, 2);
+                }
                 else
+                {
                     SmallTextLabel.Text = "";
+                }
             }
             else
             {
@@ -328,7 +359,9 @@ namespace LiveSplit.UI.Components
                         ?? state.LayoutSettings.AheadGainingTimeColor;
                 }
                 else
+                {
                     TimerColor = state.LayoutSettings.AheadGainingTimeColor;
+                }
             }
 
             if (Settings.OverrideSplitColors)
@@ -358,6 +391,9 @@ namespace LiveSplit.UI.Components
         {
         }
 
-        public int GetSettingsHashCode() => Settings.GetSettingsHashCode();
+        public int GetSettingsHashCode()
+        {
+            return Settings.GetSettingsHashCode();
+        }
     }
 }
